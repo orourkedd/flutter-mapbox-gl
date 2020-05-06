@@ -90,6 +90,21 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
                 style.localizeLabels(into: nil)
             }
             result(nil)
+        case "map#updateContentInsets":
+            guard let arguments = methodCall.arguments as? [String: Any] else { return }
+
+            if let bounds = arguments["bounds"] as? [String: Any],
+                let top = bounds["top"] as? CGFloat,
+                let left = bounds["left"]  as? CGFloat,
+                let bottom = bounds["bottom"] as? CGFloat,
+                let right = bounds["right"] as? CGFloat,
+                let animated = arguments["animated"] as? Bool {
+                mapView.setContentInset(UIEdgeInsets(top: top, left: left, bottom: bottom, right: right), animated: animated) {
+                    result(nil)
+                }
+            } else {
+                result(nil)
+            }
         case "map#setMapLanguage":
             guard let arguments = methodCall.arguments as? [String: Any] else { return }
             if let localIdentifier = arguments["language"] as? String, let style = mapView.style {
@@ -117,12 +132,19 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
             if let camera = Convert.parseCameraUpdate(cameraUpdate: cameraUpdate, mapView: mapView) {
                 mapView.setCamera(camera, animated: false)
             }
+            result(nil)
         case "camera#animate":
             guard let arguments = methodCall.arguments as? [String: Any] else { return }
             guard let cameraUpdate = arguments["cameraUpdate"] as? [Any] else { return }
             if let camera = Convert.parseCameraUpdate(cameraUpdate: cameraUpdate, mapView: mapView) {
+                if let duration = arguments["duration"] as? TimeInterval {
+                    mapView.setCamera(camera, withDuration: TimeInterval(duration / 1000), 
+                        animationTimingFunction: CAMediaTimingFunction(name: CAMediaTimingFunctionName.easeInEaseOut))
+                    result(nil)
+                }
                 mapView.setCamera(camera, animated: true)
             }
+            result(nil)
         case "symbol#add":
             guard let symbolAnnotationController = symbolAnnotationController else { return }
             guard let arguments = methodCall.arguments as? [String: Any] else { return }
@@ -323,7 +345,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
     // This is required in order to hide the default Maps SDK pin
     func mapView(_ mapView: MGLMapView, viewFor annotation: MGLAnnotation) -> MGLAnnotationView? {
         if annotation is MGLUserLocation {
-            return MGLUserLocationAnnotationView()
+            return nil
         }
         return MGLAnnotationView(frame: CGRect(x: 0, y: 0, width: 10, height: 10))
     }
@@ -425,6 +447,12 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
             if mode == .none {
                 channel.invokeMethod("map#onCameraTrackingDismissed", arguments: [])
             }
+        }
+    }
+    
+    func mapViewDidBecomeIdle(_ mapView: MGLMapView) {
+        if let channel = channel {
+            channel.invokeMethod("map#onIdle", arguments: []);
         }
     }
     
