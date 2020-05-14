@@ -540,6 +540,8 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
         symbolAnnotationController = MGLSymbolAnnotationController(mapView: self.mapView)
         symbolAnnotationController!.annotationsInteractionEnabled = true
         symbolAnnotationController?.delegate = self
+        symbolAnnotationController?.iconAllowsOverlap = true;
+        symbolAnnotationController?.iconIgnoresPlacement = true;
 
         mapReadyResult?(nil)
         if let channel = channel {
