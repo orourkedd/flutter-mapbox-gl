@@ -368,9 +368,7 @@ final class MapboxMapController
     if (symbolManager == null) {
       symbolManager = new SymbolManager(mapView, mapboxMap, style);
       symbolManager.setIconAllowOverlap(true);
-      symbolManager.setIconIgnorePlacement(true);
-      symbolManager.setTextAllowOverlap(true);
-      symbolManager.setTextIgnorePlacement(true);
+      symbolManager.setTextOptional(true);
       symbolManager.addClickListener(MapboxMapController.this::onAnnotationClick);
     }
   }
