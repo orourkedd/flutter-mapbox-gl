@@ -510,7 +510,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
         }
 
         lineAnnotationController = MGLLineAnnotationController(mapView: self.mapView)
-        lineAnnotationController!.annotationsInteractionEnabled = false
+        lineAnnotationController!.annotationsInteractionEnabled = true
         lineAnnotationController?.delegate = self
 
         circleAnnotationController = MGLCircleAnnotationController(mapView: self.mapView)
